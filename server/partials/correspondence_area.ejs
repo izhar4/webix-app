@@ -1,0 +1,112 @@
+<div id='correspondence_container'></div>
+<script type="text/javascript">
+  webix.ready(function(){
+    setTimeout(function() {
+      $('div[button_id="corresspondence_history"]').click(function(){
+        setTimeout(function() {
+          webix.ajax("/fetchCorrespondence").then(function(data){
+            var corresspondence_data = data.json();
+            $$("corress_hist_tbl").clearAll();
+            $$("corress_hist_tbl").parse(corresspondence_data);
+          })
+        })
+      });
+    })
+    function equals(a,b){
+      a = a.toString().toLowerCase();
+      return a.indexOf(b) !== -1;
+    }
+    var correspondenceSearch=function oneForAll(value, filter, obj){
+      if (equals(obj.CorrespondenceID, filter)) return true;
+      if (equals(obj.subscriber_id, filter)) return true;
+      if (equals(obj.user_id, filter)) return true;
+      if (equals(obj.user_lastname, filter)) return true;
+      if (equals(obj.letter_name, filter)) return true;
+      if (equals(obj.date_sent, filter)) return true;
+      if (equals(obj.updated_by, filter)) return true;
+      if (equals(obj.updated_at, filter)) return true;
+      if (equals(obj.notes, filter)) return true;
+      return false;
+    };
+    webix.ui({
+      container:"correspondence_container",
+      rows:[
+        { view:"button", value:"Add Correspondence", width:179,
+          click:function(){
+            var id = 0;
+            $$("corress_hist_tbl").data.each(function(obj){
+              id = Math.max(id, obj.id);
+            });
+            $$("corress_hist_tbl").add({id:id+1})
+          }
+        }
+      ]
+    })
+    webix.ui({
+      container: "correspondence_container",
+      id:"corress_hist_tbl",
+      view:"datatable",
+      select:true,
+      scrollY:true,
+      editable:true,
+      editaction:"click",
+      columns:[
+        { id:"CorrespondenceID",  header:["#", {
+          content:"textFilter", placeholder:"Type here to filter the grid",compare:correspondenceSearch, colspan:6}], width:50, sort:"int"},
+        {id:"subscriber_id", header:"Subscriber Id", sort:"int", adjust:"header"},
+        {id:"user_id", header:"First Name", adjust:"header",editor:"combo", options:"/getUsersDropDown/", sort:"string"},
+        {id:"user_lastname", header:"Last Name", sort:"string", adjust:"header"},
+        {id:"letter_name", header:"Letter Name", sort:"string", adjust:"header",editor:"text" },
+        {id:"date_sent", header:"Date Sent", sort:"string", adjust:"header",editor:"date",format:webix.Date.dateToStr("%m-%d-%Y")},
+        {id:"updated_by", header:"Updated By", sort:"string", adjust:"header",editor:"text" },
+        {id:"notes", header:"Notes",adjust:"data",editor:"text",minWidth:100},
+        {id:"updated_at", header:"Date Updated", sort:"string", adjust:"header",editor:"date",format:webix.Date.dateToStr("%m-%d-%Y")},
+        {id:"", header:"&nbsp;", width:25, template:"<span  style='color:#777777; cursor:pointer;' class='webix_icon fa-trash-o'></span>"}
+      ],
+      rules:{
+        "user_id": webix.rules.isNotEmpty,
+        "letter_name": webix.rules.isNotEmpty,
+        "updated_by": webix.rules.isNotEmpty,
+        "updated_at": webix.rules.isNotEmpty,
+      },
+      save:{
+        "insert":"/update_Correspondence",
+        "update":"/update_Correspondence"
+      },
+      autoheight:true,
+      autowidth:false,
+      on:{
+        "onDataUpdate": function(id,data){
+          var record = this.getItem(id);
+          var $this = this
+          webix.ajax("/getUserById/"+record['user_id']).then(function(data){
+            var users_select = data.json();
+            record['subscriber_id'] = users_select[0]['subscriber_id'];
+            record['user_lastname'] = users_select[0]['last_name'];
+            $this.refresh();
+          })
+        }
+      },
+      onClick:{
+        "webix_icon":function(ev, id){
+          var row_id = id
+          var data_id = this.getItem(id).CorrespondenceID
+          webix.confirm({
+            text:"Are you sure", ok:"Yes", cancel:"Cancel",
+            callback:function(res){
+              if (res== true){
+                webix.ajax("/deleteCorrespondence/"+data_id).then(function (text) {
+                  var response = text.json();
+                  if(response == "Correspondence Deleted" || response == "No record found" ){
+                    $$("corress_hist_tbl").remove(row_id)
+                  }
+              });
+              }
+              if(res)return false}
+          });
+          return false
+        }
+      }
+    })
+  });
+</script>

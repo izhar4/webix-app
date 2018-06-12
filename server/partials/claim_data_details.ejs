@@ -1,0 +1,94 @@
+<div>
+  <div id="chartDiv" style="width:700px;height:300px;margin:20px;">
+  </div>
+  <div id="form_sort" style="width:700px;height:50px;margin:20px">
+  </div>
+  <div id="claim_details_list"></div>
+</div>
+<script>
+  webix.ui({
+      container:"claim_details_list",
+      rows:[
+        { view:"button", value:"Add Claim Details", width:179,hidden:true,id:"add_claim_btn",
+          click:function(){
+            var data_id = $('div[view_id="add_claim_btn"]').attr('data')
+            webix.ajax("/getUserById/"+data_id).then(function(data){
+            var users_select = data.json();
+            var  subscriber_id= users_select[0]['subscriber_id'];
+            var  first_name= users_select[0]['first_name'];
+            var last_name = users_select[0]['last_name'];
+            $$("claim_details_tbl").add({user_firstname: first_name,user_lastname: last_name,subscriber_id: subscriber_id,user_id: data_id });
+          })
+          }
+        }
+      ]
+    })
+  webix.ui({
+    borderless:true,
+    id:"c_details_chart",
+    container:"chartDiv",
+    view:"chart",
+    type:"bar",
+    hidden:true,
+    value:"#totalClaimPaidAmt#",
+    label:"#totalClaimPaidAmt#",
+    // color:"#ProgramID#",
+    radius:0,
+    barWidth:40,
+    tooltip:{
+        template:"#totalClaimPaidAmt#"
+    },
+    xAxis:{
+        template:"#month#"
+      },
+    yAxis:{
+        property: "#totalClaimPaidAmt#"
+      },
+    padding:{
+      property: "#totalClaimPaidAmt#"
+    },
+  });
+  webix.ui({
+    container:"form_sort",
+    id:"c_details_btn",
+    margin: 10,
+    hidden:true,
+    cols:[
+      { view: "button", label: "TotalClaimPaidAmt, DESC",  click:"$$('c_details_chart').sort('#totalClaimPaidAmt#','desc');"},
+      { view: "button", label: "sort by month, ASC",  click:"$$('c_details_chart').sort('#month #','asc');"}
+    ]
+  });
+  webix.ui({
+    container: "claim_details_list",
+    id:"claim_details_tbl",
+    view:"datatable",
+    select:true,
+    scrollY:true,
+    editable:true,
+    select:true,
+    hidden:true,
+    editaction:"click",
+    columns:[
+      { id:"ClaimID", header:"#", width:50, sort:"int"},
+      {id:"user_id", header:"Subscriber Id", sort:"int", adjust:"header", hidden:true},
+      {id:"subscriber_id", header:"Subscriber Id", sort:"int", adjust:"header"},
+      {id:"user_firstname", header:"First Name", sort:"string", adjust:"header"},
+      {id:"user_lastname", header:"Last Name", sort:"string", adjust:"header"},
+      {id:"paidAMT", header:"Paid Amt", sort:"string", adjust:"header",editor:"text" },
+      {id:"allowedAMT", header:"Allowed Amt", sort:"string", adjust:"header",editor:"text" },
+      {id:"diagnosisCode", header:"Diagnosis Code", sort:"string", adjust:"header",editor:"text" },
+      {id:"procedureCode", header:"Procedure Code", sort:"string", adjust:"header",editor:"text" },
+      {id:"claimDateofService", header:"Claim Date Service", sort:"string", adjust:"header",editor:"date",format:webix.Date.dateToStr("%m-%d-%Y") }
+    ],
+    rules:{
+      "claimDateofService": webix.rules.isNotEmpty,
+      "paidAMT": webix.rules.isNotEmpty,
+    },
+    save:{
+      "insert":"/claimsDetails",
+      "update":"/claimsDetails",
+      },
+    autoheight:true,
+    autowidth:false,
+  })
+</script>

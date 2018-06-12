@@ -1,0 +1,227 @@
+<div>
+  <div id="eligi_popup" class="pcp_col">
+    <script type="text/javascript">
+      var pcb_tab = function(){
+        var data_id = $('div[view_id="pcp_popup_eligi_btn"]').attr('data');
+        webix.ajax("getUserPcp/"+data_id).then(function (text) {
+          var pcp_hist_data = text.json();
+          if(pcp_hist_data.length == 0){
+              $$('pcp_edit_eligi_form').setValues({ user_id: data_id });
+            }
+          else{
+            $$("pcp_edit_eligi_form").parse(pcp_hist_data);
+          }
+          $$("pcp_edit_eligi_window").show();
+        });
+      }
+      var eligib_tab = function(){
+        var data_id = $('div[view_id="eligib_popup_eligi_btn"]').attr('data');
+        webix.ajax("getUserEligibility/"+data_id).then(
+          function (text) {
+          var eligib_hist_data = text.json();
+          if(eligib_hist_data.length == 0){
+            $$('elig_edit_eligi_form').setValues({ user_id: data_id });
+            }
+          else{
+            $$("elig_edit_eligi_form").parse(eligib_hist_data);
+          }
+          $$("eligi_edit_eligi_window").show();
+        });
+      }
+      var correspondence_tab = function(){
+        var data_id = $('div[view_id="corres_popup_eligi_btn"]').attr('data');
+        webix.ajax("getUserCorrespondence/"+data_id).then(
+          function (text) {
+          var corresp_hist_data = text.json();
+          if(corresp_hist_data.length == 0){
+            $$('corres_edit_eligi_form').setValues({ user_id: data_id });
+            }
+          else{
+            $$("corres_edit_eligi_form").parse(corresp_hist_data);
+          }
+          $$("corres_edit_eligi_window").show();
+        });
+      }
+      var demographic_tab = function(){
+        var data_id = $('div[view_id="demo_popup_eligi_btn"]').attr('data');
+        webix.ajax("getUser/"+data_id).then(
+          function (text) {
+          $$("demo_edit_eligi_window").show();
+          var demographics_data = text.json();
+          $$("demo_edit_eligi_form").parse(demographics_data);
+        });
+      }
+      webix.ui({
+        container: 'eligi_popup',
+        id: 'pcp_popup_eligi_btn',
+        view:"button",
+        type:"icon",
+        icon:"envelope",
+        label:"PCP HISTORY",
+        click: pcb_tab
+      });
+      webix.ui({
+        container: 'eligi_popup',
+        id: 'eligib_popup_eligi_btn',
+        view:"button",
+        type:"icon", icon:"envelope",
+        label:"ELIGIBILITY HISTORY",
+        click: eligib_tab
+      });
+      webix.ui({
+        container: 'eligi_popup',
+        id: 'corres_popup_eligi_btn',
+        view:"button",
+        type:"icon", icon:"envelope",
+        label:"CORRESPONDENCE HISTORY",
+        click: correspondence_tab
+      });
+      webix.ui({
+        container: 'eligi_popup',
+        id: 'demo_popup_eligi_btn',
+        view:"button",
+        type:"icon", icon:"envelope",
+        label:"DEMOGRAPHICS",
+        click: demographic_tab
+      });
+    </script>
+  </div>
+</div>
+<script type="text/javascript">
+
+  webix.ready(function(){
+    webix.ui({
+      view:"window",
+      id:"pcp_edit_eligi_window",
+      templateCopy: "#id#",
+      head:"EDIT PCP",
+      zIndex:1,
+      modal:true,
+      move:true,
+      top:100,
+      left:10,
+      body:{
+        view:"form", id:"pcp_edit_eligi_form", elements:[
+          { view:"text", label:"FirstName", name:"pcp_first_name"},
+          { hidden: true, id: "user_id"},
+          { view:"text", label:"LastName", name:"pcp_last_name"},
+          { view:"text", label:"Provider1", name:"provider_type1"},
+          { view:"text", label:"Provider2", name:"provider_type2"},
+          { view:"text", label:"Address1", name:"address1"},
+          { view:"text", label:"Address2", name:"address2"},
+          { view:"text", label:"City", name:"city"},
+          { view:"text", label:"State", name:"state"},
+          { view:"text", label:"ZipCode", name:"zipcode"},
+          { view:"text", label:"Email", name:"email"},
+          { view:"text", label:"Phone", name:"phone"},
+          { view:"text", label:"UpdatedBy", name:"updated_by"},
+          { view:"datepicker", label:"Updated At", stringResult:true, name:"updated_at"},
+          { view:"text", label:"Notes", name:"notes"},
+          { cols:[
+            { view:"button", value:"Cancel",click:"$$('pcp_edit_eligi_window').hide();"},
+            { view:"button", type:"form", value:"Save", click:function(){
+              var data = $$("pcp_edit_eligi_form").getValues();
+              webix.ajax().post("/updatePCP", data);
+              $$('pcp_edit_eligi_window').hide();
+            }}
+          ]}
+        ]
+      }
+    });
+    webix.ui({
+      view:"window",
+      id:"eligi_edit_eligi_window",
+      head:"EDIT ELIGIBILITY",
+      modal:true,
+      move:true,
+      left:330,
+      top: 100,
+      zIndex:1,
+      body:{
+        view:"form", id:"elig_edit_eligi_form", elements:[
+          { view:"text", label:"FirstName", name:"user_firstname",readonly:true},
+          { hidden: true, id: "user_id"},
+          { view:"text", label:"LastName", name:"user_lastname",readonly:true},
+          { view:"datepicker", label:"DateFrom", stringResult:true, name:"date_from"},
+          { view:"datepicker", label:"DateTo", stringResult:true, name:"date_to"},
+          { view:"text", label:"ProgramId", name:"ProgramID"},
+          { view:"text", label:"UpdatedBy", name:"updated_by"},
+          { view:"datepicker", label:"Updated At", stringResult:true, name:"updated_at"},
+          { view:"text", label:"Notes", name:"notes"},
+          { cols:[
+            { view:"button", value:"Cancel",click:"$$('eligi_edit_eligi_window').hide();"},
+            { view:"button", type:"form", value:"Save", click:function(){
+              var data = $$("elig_edit_eligi_form").getValues();
+              webix.ajax().post("/updateEnrollment", data);
+              $$('eligi_edit_eligi_window').hide();
+            }}
+          ]}
+        ]
+      }
+    });
+    webix.ui({
+      view:"window",
+      id:"corres_edit_eligi_window",
+      head:"EDIT CORRESPONDENCE",
+      modal:true,
+      move:true,
+      top: 100,
+      left:660,
+      zIndex:1,
+      body:{
+        view:"form", id:"corres_edit_eligi_form", elements:[
+          { view:"text", label:"FirstName", name:"user_firstname",readonly:true},
+          { hidden: true, id: "user_id"},
+          { view:"text", label:"LastName", name:"user_lastname",readonly:true},
+          { view:"datepicker", label:"DateSent", stringResult:true, name:"date_sent"},
+          { view:"text", label:"UpdatedBy", name:"updated_by"},
+          { view:"datepicker", label:"DateUpdated", stringResult:true, name:"updated_at"},
+          { view:"text", label:"Notes", name:"notes"},
+          { cols:[
+            { view:"button", value:"Cancel",click:"$$('corres_edit_eligi_window').hide();"},
+            { view:"button", type:"form", value:"Save", click:function(){
+              var data = $$("corres_edit_eligi_form").getValues();
+              webix.ajax().post("/update_Correspondence", data);
+              $$('corres_edit_eligi_window').hide();
+            }}
+          ]}
+        ]
+      }
+    });
+    webix.ui({
+      view:"window",
+      id:"demo_edit_eligi_window",
+      head:"EDIT DEMOGRAPHICS",
+      modal:true,
+      move:true,
+      top: 100,
+      left:1000,
+      zIndex:1,
+      body:{
+        view:"form", id:"demo_edit_eligi_form", elements:[
+          { view:"text", label:"SubscriberId", name:"subscriber_id"},
+          { view:"text", label:"FirstName", name:"first_name"},
+          { view:"text", label:"LastName", name:"last_name"},
+          { view:"text", label:"Role", name:"role"},
+          { view:"text", label:"Gender", name:"gender"},
+          { view:"text", label:"Address1", name:"address_1"},
+          { view:"text", label:"Address2", name:"address_2"},
+          { view:"text", label:"City", name:"city"},
+          { view:"text", label:"State", name:"state"},
+          { view:"text", label:"Zipcode", name:"zipcode"},
+          { view:"text", label:"Email", name:"email"},
+          { view:"text", label:"Phone", name:"phone"},
+          { view:"text", label:"UpdatedBy", name:"updated_by"},
+          { cols:[
+            { view:"button", value:"Cancel",click:"$$('demo_edit_eligi_window').hide();"},
+            { view:"button", type:"form", value:"Save", click:function(){
+              var data = $$("demo_edit_eligi_form").getValues();
+              webix.ajax().post("/updateUser", data);
+              $$('demo_edit_eligi_window').hide();
+            }}
+          ]}
+        ]
+      }
+    });
+  });
+</script>

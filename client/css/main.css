@@ -1,0 +1,21 @@
+/*body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #00B7FF;
+}
+*/
+.login_form {
+    width: 100%;
+    float: left;
+    display: table;
+    height: 500px;
+}
+.login_form form {
+    display: table-cell;
+    vertical-align: middle;
+    max-width: 500px;
+    width:100%;
+}

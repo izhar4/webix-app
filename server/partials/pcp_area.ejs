@@ -1,0 +1,152 @@
+<div id='pcp_container'></div>
+<div id='assign_pcp_container'>
+  <h2> Assign User PCP</h2>
+</div>
+<script type="text/javascript">
+  webix.ready(function(){
+    setTimeout(function() {
+      $('div[button_id="pcp_history"]').click(function(){
+        setTimeout(function() {
+          webix.ajax("/getPcp").then(function(data){
+            var pcp_data = data.json();
+            $$("pcp_hist_tbl").clearAll();
+            $$("pcp_hist_tbl").parse(pcp_data);
+          })
+           webix.ajax("/assignPCP").then(function(data){
+            var pcp_data = data.json();
+            $$("assign_pcp_tbl").clearAll();
+            $$("assign_pcp_tbl").parse(pcp_data);
+          })
+        })
+      });
+    })
+    function equals(a,b){
+      a = a.toString().toLowerCase();
+      return a.indexOf(b) !== -1;
+    }
+    var pcpSearch=function oneForAll(value, filter, obj){
+          if (equals(obj.PCPID, filter)) return true;
+          if (equals(obj.pcp_first_name, filter)) return true;
+          if (equals(obj.pcp_last_name, filter)) return true;
+          if (equals(obj.provider_type1, filter)) return true;
+          if (equals(obj.provider_type2, filter)) return true;
+          if (equals(obj.address1, filter)) return true;
+          if (equals(obj.address2, filter)) return true;
+          if (equals(obj.city, filter)) return true;
+          if (equals(obj.state, filter)) return true;
+          if (equals(obj.zipcode, filter)) return true;
+          if (equals(obj.email, filter)) return true;
+          if (equals(obj.phone, filter)) return true;
+          if (equals(obj.updated_by, filter)) return true;
+          if (equals(obj.updated_at, filter)) return true;
+          if (equals(obj.notes, filter)) return true;
+          return false;
+    };
+    webix.ui({
+      container:"pcp_container",
+      rows:[
+        { view:"button", value:"Add PCP", width:179,
+          click:function(){
+            var id = 0;
+            $$("pcp_hist_tbl").data.each(function(obj){
+              id = Math.max(id, obj.id);
+            });
+            $$("pcp_hist_tbl").add({id:id+1})
+          }
+        }
+      ]
+    })
+    webix.ui({
+      container: "pcp_container",
+      view:"datatable",
+      select:true,
+      id:"pcp_hist_tbl",
+      select:true,
+      editable:true,
+      editaction:"click",
+      columns:[
+        { id:"PCPID",  header:["#", {
+          content:"textFilter", placeholder:"Type here to filter the grid",compare:pcpSearch, colspan:12}], width:50, sort:"int"},
+        {id:"user_id", header:"First Name", adjust:"header",editor:"combo", options:"/getUsersDropDown/", sort:"string",  minWidth:80},
+        {id:"pcp_last_name", header:"PCP Last Name", sort:"string", adjust:"data",editor:"text",  minWidth:80 },
+        {id:"provider_type1", header:"Provider Type1", sort:"string", adjust:"data",editor:"text",  minWidth:80 },
+        {id:"provider_type2", header:"Provider Type2", sort:"string", adjust:"data",editor:"text",  minWidth:80 },
+        {id:"address1", header:"Address1",sort:"string",adjust:"data",editor:"text",  minWidth:80},
+        {id:"address2", header:"Address2",sort:"string",adjust:"data",editor:"text", minWidth:80},
+        {id:"city", header:"City",sort:"string",adjust:"data",editor:"text", minWidth:80},
+        {id:"state", header:"State",sort:"string",adjust:"data",editor:"text", minWidth:80},
+        {id:"zipcode", header:"ZipCode",sort:"string",adjust:"data",editor:"text", minWidth:80},
+        {id:"email", header:"Email",sort:"string",adjust:"data",editor:"text", minWidth:80},
+        {id:"updated_by", header:"Updated By", sort:"string",adjust:"header",editor:"text", minWidth:80},
+        {id:"updated_at", header:"Date Updated", sort:"string", adjust:"header",editor:"date",format:webix.Date.dateToStr("%m-%d-%Y"),minWidth:80},
+        {id:"notes", header:"Notes", sort:"string", adjust:"header",editor:"text", minWidth:80},
+        {id:"phone", header:"Phone",sort:"string",adjust:"data",editor:"text", minWidth:80},
+        {id:"", header:"&nbsp;", width:25, template:"<span  style='color:#777777; cursor:pointer;' class='webix_icon fa-trash-o'></span>"}
+      ],
+      rules:{
+          "user_id": webix.rules.isNotEmpty,
+          "phone": webix.rules.isNotEmpty,
+        },
+      save:{
+        "insert":"/updatePCP",
+        "update":"/updatePCP"
+      },
+      autoheight:true,
+      autowidth:false,
+      on:{
+        "onDataUpdate": function(id,data){
+          var record = this.getItem(id);
+          var $this = this
+          webix.ajax("/getUserById/"+record['user_id']).then(function(data){
+            var users_select = data.json();
+            // record['subscriber_id'] = users_select[0]['subscriber_id'];
+            record['pcp_last_name'] = users_select[0]['last_name'];
+            $this.refresh();
+          })
+        }
+      },
+      onClick:{
+        "webix_icon":function(ev, id){
+          var row_id = id
+          var data_id = this.getItem(id).PCPID
+          webix.confirm({
+            text:"Are you sure", ok:"Yes", cancel:"Cancel",
+            callback:function(res){
+              if (res== true){
+                webix.ajax("/deletePCP/"+data_id).then(function (text) {
+                  var response = text.json();
+                  if(response == "PCP Deleted" || response == "No record found" ){
+                    $$("pcp_hist_tbl").remove(row_id)
+                    $$("assign_pcp_tbl").refresh();
+                  }
+              });
+              }
+              if(res)return false}
+          });
+          return false
+        }
+      }
+    });
+
+    webix.ui({
+      container: "assign_pcp_container",
+      view:"datatable",
+      select:true,
+      id:"assign_pcp_tbl",
+      select:true,
+      columns:[
+        { id:"id",  header:"#"},
+        { id:"PCPID",  header:"PCP ID"},
+        {id:"user_firstname", header:"User First Name", sort:"string", adjust:"header"},
+        {id:"dateFrom", header:"Date From", sort:"string", adjust:"header"},
+        {id:"dateTo", header:"Date To", sort:"string", adjust:"header" },
+        {id:"updated_by", header:"Updated By", sort:"string", adjust:"header"},
+        {id:"notes", header:"Notes", sort:"string", adjust:"header"},
+      ],
+      autoheight:true,
+      autowidth:false,
+    })
+
+
+  });
+</script>

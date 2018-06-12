@@ -1,0 +1,216 @@
+<!doctype html>
+<html>
+<head>
+  <link rel="stylesheet" href="http://cdn.webix.com/edge/webix.css" type="text/css">
+  <link rel="stylesheet" href="/css/custom.css" type="text/css">
+  <script src="http://cdn.webix.com/edge/webix.js" type="text/javascript"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js" type="text/javascript"></script>
+  <style type="text/css">
+.logout_btn{
+  float: right;
+    background: #db4553;
+    max-width: 150px;
+    width: 100%;
+    padding: 6px 0;
+    border: none;
+    color: #fff;
+    font-size: 17px;
+    border-radius: 5px;
+}
+   .login_col{
+    width: 100%;
+    float: right;
+   }
+
+   #main_content{
+    width: 100%;
+    float: left;
+   }
+
+  </style>
+</head>
+<body>
+    <div class="login_col">
+      <form name="form2" method="GET" action="/logout">
+
+      <input type="submit" class="logout_btn" value="logout" >
+      </form>
+    </div>
+    <div id="main_content"></div>
+    <div id='demographic_tab'>
+    <div style="width:85%; height:791px; float:left;">
+      <% include ../partials/demographic_area %>
+    </div>
+    <div style="width:15%; float:left;">
+      <% include ../partials/demographic_popups %>
+    </div>
+    <script type="text/javascript">
+      webix.ready(function(){
+        $$("demographic_tbl").attachEvent("onAfterSelect", function(id){
+          var data_id = this.getItem(id).UserID
+          $('div[view_id="pcp_popup_demo_btn"]').attr('data', data_id);
+          $('div[view_id="eligib_popup_demo_btn"]').attr('data', data_id);
+          $('div[view_id="corres_popup_demo_btn"]').attr('data', data_id);
+          $('div[view_id="demo_popup_demo_btn"]').attr('data', data_id);
+        });
+
+        $$("demographic_tbl").attachEvent("onAfterSave", function(id){
+          webix.message("created")
+        });
+      });
+    </script>
+  </div>
+  <div id='eligibility_tab'>
+    <div style="width:85%; height:791px; float:left;overflow-y: scroll;">
+      <% include ../partials/eligibility_area %>
+    </div>
+    <div style="width:15%; float:left;">
+      <% include ../partials/eligibility_popups %>
+    </div>
+    <script type="text/javascript">
+      webix.ready(function(){
+        $$("eligibility_tbl").attachEvent("onAfterSelect", function(id){
+          var data_id = this.getItem(id).user_id
+          $('div[view_id="pcp_popup_eligi_btn"]').attr('data', data_id);
+          $('div[view_id="eligib_popup_eligi_btn"]').attr('data', data_id);
+          $('div[view_id="corres_popup_eligi_btn"]').attr('data', data_id);
+          $('div[view_id="demo_popup_eligi_btn"]').attr('data', data_id);
+        });
+      });
+    </script>
+  </div>
+  <div id='pcp_history_tab'>
+    <div style="width:85%; height:838px; float:left;overflow-y: scroll;">
+      <% include ../partials/pcp_area %>
+    </div>
+    <div style="width:15%; float:left;">
+      <% include ../partials/pcp_popups %>
+    </div>
+    <script type="text/javascript">
+      webix.ready(function(){
+        $$("pcp_hist_tbl").attachEvent("onAfterSelect", function(id){
+          var data_id = this.getItem(id).user_id
+          $('div[view_id="pcp_popup_pcp_btn"]').attr('data', data_id);
+          $('div[view_id="eligib_popup_pcp_btn"]').attr('data', data_id);
+          $('div[view_id="corres_popup_pcp_btn"]').attr('data', data_id);
+          $('div[view_id="demo_popup_pcp_btn"]').attr('data', data_id);
+        });
+      });
+    </script>
+  </div>
+  <div id='correspondence_history_tab'>
+    <div style="width:85%; height:791px; float:left;overflow-y: scroll;">
+      <% include ../partials/correspondence_area %>
+    </div>
+    <div style="width:15%; float:left;">
+      <% include ../partials/correspondence_popups %>
+    </div>
+    <script type="text/javascript">
+      webix.ready(function(){
+        $$("corress_hist_tbl").attachEvent("onAfterSelect", function(id){
+          var data_id = this.getItem(id).user_id
+          $('div[view_id="pcp_popup_corres_btn"]').attr('data', data_id);
+          $('div[view_id="eligib_popup_corres_btn"]').attr('data', data_id);
+          $('div[view_id="corres_popup_corres_btn"]').attr('data', data_id);
+          $('div[view_id="demo_popup_corres_btn"]').attr('data', data_id);
+        });
+      });
+    </script>
+  </div>
+  <div id='claim_analysis_tab'>
+    <div style="width:50%; height:791px; float:left;overflow-x: hidden;overflow-y: scroll;">
+      <% include ../partials/claim_data %>
+    </div>
+    <div style="width:50%; float:left;">
+      <% include ../partials/claim_data_details %>
+    </div>
+    <script type="text/javascript">
+      webix.ready(function(){
+        $$("claim_data_tbl").attachEvent("onAfterSelect", function(id){
+          var user_id = this.getItem(id).UserID
+          $$("add_claim_btn").show()
+          $('div[view_id="add_claim_btn"]').attr('data', user_id);
+          webix.ajax("/fetchUserClaimDetails/"+user_id).then(function(data){
+            var claim_datails_data = data.json();
+            $$("claim_details_tbl").show()
+            $$("claim_details_tbl").clearAll()
+            $$("claim_details_tbl").parse(claim_datails_data);
+          })
+          webix.ajax("/getClaimDetails/"+user_id).then(function(data){
+            var claim_datails_graph = data.json();
+            $$("c_details_chart").clearAll()
+            $$("c_details_chart").parse(claim_datails_graph);
+            $$("c_details_chart").show();
+            $$("c_details_btn").show();
+          })
+        });
+        $$("claim_details_tbl").attachEvent("onDataUpdate", function(id){
+              var user_id = this.getItem(id).user_id
+              var $this = this;
+            setTimeout(function() {
+              $$("multi_chart").load("/getClaimsData");
+              $$("claim_data_tbl").load("/getClaimsData");
+             }, 1000)
+            setTimeout(function() {
+              webix.ajax("/getClaimDetails/"+user_id).then(function(data){
+                var claim_datails_graph = data.json();
+                $$("c_details_chart").clearAll()
+                $$("c_details_chart").parse(claim_datails_graph);
+                $$("c_details_chart").show();
+                $$("c_details_btn").show();
+              })
+            $this.refresh();
+            }, 1000)
+        });
+      });
+    </script>
+  </div>
+  <script type="text/javascript">
+    var demographic = {
+      id: "demographic",
+      content: 'demographic_tab'
+    };
+    var eligibility = {
+      id: "eligibility",
+      content: 'eligibility_tab'
+    };
+    var pcp_history = {
+      id: "pcp_history",
+      content: 'pcp_history_tab'
+    };
+    var corresspondence_history = {
+      id: "corresspondence_history",
+      content: 'correspondence_history_tab'
+    };
+    var claim_analysis = {
+      id: "claim_analysis",
+      content: 'claim_analysis_tab'
+    };
+
+    webix.ready(function(){
+      webix.ui({
+        container:"main_content",
+        rows:[
+          {
+            view:"tabbar", tabOffset:0, id:"top-tabbar", multiview:true, borderless:true,
+            options:[
+              {id:"demographic", value:"DemographicsHistory", click: function(){
+                this.refresh();
+              }},
+              {id:"eligibility", value:"EligibilityHistory"},
+              {id:"pcp_history" , value:"PCPHistory"},
+              {id:"corresspondence_history", value:"CorrespondenceHistory"},
+              {id:"claim_analysis", value:"ClaimsUsageAnalysis", click: function(){
+                this.refresh();}}
+            ]
+          },
+          {
+            animate: false,
+            cells:[eligibility, demographic, pcp_history, corresspondence_history, claim_analysis]
+          }
+        ]
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<div id='demographic_container'></div>
+<style type="text/css">
+.add_button {
+    max-width: 111px;
+    width: 100%;
+}
+</style>
+<script type="text/javascript">
+  webix.ready(function(){
+    function equals(a,b){
+      a = a.toString().toLowerCase();
+      return a.indexOf(b) !== -1;
+    }
+    var demographicSearch=function oneForAll(value, filter, obj){
+      if (equals(obj.UserID, filter)) return true;
+      if (equals(obj.subscriber_id, filter)) return true;
+      if (equals(obj.first_name, filter)) return true;
+      if (equals(obj.last_name, filter)) return true;
+      if (equals(obj.role, filter)) return true;
+      if (equals(obj.address_1, filter)) return true;
+      if (equals(obj.address_2, filter)) return true;
+      if (equals(obj.city, filter)) return true;
+      if (equals(obj.state, filter)) return true;
+      if (equals(obj.zipcode, filter)) return true;
+      if (equals(obj.email, filter)) return true;
+      if (equals(obj.phone, filter)) return true;
+      if (equals(obj.updated_by, filter)) return true;
+      return false;
+    };
+    webix.ui({
+      container:"demographic_container",
+      rows:[
+        { view:"button", value:"Add User", width:179,
+          click:function(){
+            var id = 0;
+            $$("demographic_tbl").data.each(function(obj){
+              id = Math.max(id, obj.UserID);
+            });
+            $$("demographic_tbl").add({UserID:id+1})
+          }
+        }
+      ]
+    })
+    dtable = webix.ui({
+      container:"demographic_container",
+      id:"demographic_tbl",
+      view:"datatable",
+      select:true,
+      editable:true,
+      editaction:"click",
+      url:"/getUsersData",
+      columns:[
+        { id:"UserID",  header:["#", {
+          content:"textFilter", placeholder:"Type here to filter the grid",compare:demographicSearch, colspan:9}], width:50, sort:"int", adjust:"data"},
+        {id:"subscriber_id", header:"Subscriber ID",sort:"string", adjust:"header",editor:"text",sort:"string"},
+        {id:"first_name", header:"First Name",sort:"string", adjust:"header",editor:"text"},
+        {id:"last_name", header:"Last Name",sort:"string", adjust:"header",editor:"text"},
+        {id:"role", header:"Role",sort:"string",adjust:"header",editor:"text"},
+        {id:"gender", header:"Gender",sort:"string",adjust:"header",editor:"text"},
+        {id:"address_1", header:"Address1",sort:"string",adjust:"header",editor:"text"},
+        {id:"address_2", header:"Address2",sort:"string",adjust:"header",editor:"text"},
+        {id:"city", header:"City",sort:"string",adjust:"data",editor:"text"},
+        {id:"state", header:"State",sort:"string",adjust:"data",editor:"text"},
+        {id:"zipcode", header:"ZipCode",sort:"string",adjust:"data",editor:"text"},
+        {id:"email", header:"Email",sort:"string",adjust:"data",editor:"text"},
+        {id:"phone", header:"Phone",sort:"string",adjust:"data",editor:"text"},
+        {id:"updated_by", header:"Updated By",sort:"string",adjust:"data",editor:"text"},
+        {id:"", header:"&nbsp;", width:25, template:"<span  style='color:#777777; cursor:pointer;' class='webix_icon fa-trash-o'></span>"}
+      ],
+      rules:{
+        "subscriber_id": webix.rules.isNotEmpty,
+        "last_name": webix.rules.isNotEmpty,
+        "role": webix.rules.isNotEmpty,
+        "gender": webix.rules.isNotEmpty,
+        "phone": webix.rules.isNotEmpty,
+        "updated_by": webix.rules.isNotEmpty,
+      },
+      fixedRowHeight:false,
+      autoheight:true,
+      autowidth:false,
+      save:{
+        "insert":"/updateUser",
+        "update":"/updateUser"
+      },
+      onClick:{
+        "webix_icon":function(ev, id){
+          var row_id = id
+          var data_id = this.getItem(id).UserID
+          webix.confirm({
+            text:"Are you sure", ok:"Yes", cancel:"Cancel",
+            callback:function(res){
+              if (res== true){
+                webix.ajax("/deleteUserById/"+data_id).then(function (text) {
+                  var response = text.json();
+                  if(response == "User Deleted" || response == "No record found" ){
+                    $$("demographic_tbl").remove(row_id)
+                  }
+              });
+              }
+              if(res)return false}
+          });
+          return false
+        }
+      }
+    })
+
+  });
+</script>

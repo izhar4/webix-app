@@ -1,0 +1,11 @@
+body.webix_full_screen {
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+}
+.webix_view{
+  overflow: visible !important;
+}
+.webix_modal {
+  width: auto !important;
+  background-color: transparent !important;
+}

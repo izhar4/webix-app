@@ -1,0 +1,151 @@
+<div>
+  <div id="pcppopup" class="pcp_col">
+    <script type="text/javascript">
+      var pcb_tab = function(){
+        var data_id = $('div[view_id="pcp_popuppcp"]').attr('data');
+        webix.ajax("home/new?data_id="+data_id).then(function (text) {
+          $$("pcp_hist").show();
+          var pcp_hist_data = text.json();
+          $$("edit_pcp_hist").parse(pcp_hist_data);
+        });
+      }
+      var eligib_tab = function(){
+        var data_id = $('div[view_id="eligib_popuppcp"]').attr('data');
+        webix.ajax("home/new?data_id="+data_id).then(
+          function (text) {
+          $$("eligibility_hist").show();
+          var eligib_hist_data = text.json();
+          $$("edit_elig_hist").parse(eligib_hist_data);
+        });
+      }
+      var correspondence_tab = function(){
+        var data_id = $('div[view_id="corres_popuppcp"]').attr('data');
+        webix.ajax("home/new?data_id="+data_id).then(
+          function (text) {
+          $$("correspondence_hist").show();
+          var corresp_hist_data = text.json();
+          $$("edit_correspondence_hist").parse(corresp_hist_data);
+        });
+      }
+      var demographic_tab = function(){
+        var data_id = $('div[view_id="demo_popuppcp"]').attr('data');
+        webix.ajax("home/new?data_id="+data_id).then(
+          function (text) {
+          $$("demographics_form").show();
+          var demographics_data = text.json();
+          $$("edit_demographics_form").parse(demographics_data);
+        });
+      }
+      webix.ui({
+        container: 'pcppopup',
+        id: 'pcp_popuppcp',
+        view:"button",
+        type:"icon",
+        icon:"envelope",
+        label:"PCP HISTORY",
+        click: pcb_tab
+      });
+      webix.ui({
+        container: 'pcppopup',
+        id: 'eligib_popuppcp',
+        view:"button",
+        type:"icon", icon:"envelope",
+        label:"ELIGIBILITY HISTORY",
+        click: eligib_tab
+      });
+      webix.ui({
+        container: 'pcppopup',
+        id: 'corres_popuppcp',
+        view:"button",
+        type:"icon", icon:"envelope",
+        label:"CORRESPONDENCE HISTORY",
+        click: correspondence_tab
+      });
+      webix.ui({
+        container: 'pcppopup',
+        id: 'demo_popuppcp',
+        view:"button",
+        type:"icon", icon:"envelope",
+        label:"DEMOGRAPHICS",
+        click: correspondence_tab
+      });
+    </script>
+  </div>
+</div>
+<script type="text/javascript">
+
+  webix.ready(function(){
+    webix.ui({
+      view:"window",
+      id:"pcp_hist",
+      templateCopy: "#id#",
+      head:"EDIT PCP HISTORY",
+      zIndex:1,
+      modal:true,
+      position:"center",
+      save: "home/update_info",
+      body:{
+        view:"form", id:"edit_pcp_hist", elements:[
+          { view:"text", label:"Title", name:"title"},
+          { view:"text", label:"Year", name:"year"},
+          { view:"text", label:"Votes", name:"votes"},
+          { cols:[
+            { view:"button", value:"Cancel",click:"$$('pcp_hist').hide();"},
+            { view:"button", type:"form", value:"Save", click:function(){
+              var data = $$("edit_pcp_hist").getValues();
+              webix.ajax().post("/home/update_pop", data);
+              $$('pcp_hist').close();
+            }}
+          ]}
+        ]
+      }
+    });
+    webix.ui({
+      view:"window",
+      id:"eligibility_hist",
+      head:"EDIT ELIGIBILITY HISTORY",
+      modal:true,
+      zIndex:1,
+      position:"center",
+      body:{
+        view:"form", id:"edit_elig_hist", elements:[
+          { view:"text", label:"Title", name:"title"},
+          { view:"text", label:"Year", name:"year"},
+          { view:"text", label:"Votes", name:"votes"},
+          { cols:[
+            { view:"button", value:"Cancel",click:"$$('eligibility_hist').hide();"},
+            { view:"button", type:"form", value:"Save", click:function(){
+              var data = $$("edit_elig_hist").getValues();
+              webix.ajax().post("/home/update_pop", data);
+              $$('eligibility_hist').hide();
+            }}
+          ]}
+        ]
+      }
+    });
+    webix.ui({
+      view:"window",
+      id:"correspondence_hist",
+      head:"EDIT CORRESPONDENCE HISTORY",
+      modal:true,
+      position:"center",
+      zIndex:1,
+      body:{
+        view:"form", id:"edit_correspondence_hist", elements:[
+          { view:"text", label:"Title", name:"title"},
+          { view:"text", label:"Year", name:"year"},
+          { view:"text", label:"Votes", name:"votes"},
+          { cols:[
+            { view:"button", value:"Cancel",click:"$$('correspondence_hist').hide();"},
+            { view:"button", type:"form", value:"Save", click:function(){
+              var data = $$("edit_correspondence_hist").getValues();
+              webix.ajax().post("/home/update_pop", data);
+              $$('correspondence_hist').hide();
+            }}
+          ]}
+        ]
+      }
+    });
+
+  });
+</script>

@@ -1,0 +1,107 @@
+<div>
+  <div id="multiple_chart" style="width:700px;height:300px;margin:20px">
+  </div>
+  <div id="multi_form_sort" style="width:700px;height:50px;margin:20px">
+  </div>
+  <div id="claim_data_list" style="margin-top: 57px;"></div>
+</div>
+<script>
+  webix.ready(function(){
+    setTimeout(function() {
+      $('div[button_id="claim_analysis"]').click(function(){
+        setTimeout(function() {
+          webix.ajax("/getClaimsData").then(function(data){
+            var claim_data = data.json();
+            $$("claim_data_tbl").parse(claim_data);
+            $$("multi_chart").parse(claim_data);
+          })
+        })
+      });
+    });
+    webix.ui({
+      container: "claim_data_list",
+      id:"claim_data_tbl",
+      view:"datatable",
+      select:true,
+      columns:[
+        {id:"subscriber_id", header:"Subscriber Id", sort:"int", adjust:"header"},
+        {id:"user_firstname", header:"First Name", sort:"string", adjust:"header"},
+        {id:"user_lastname", header:"Last Name", sort:"string", adjust:"header"},
+        {id:"totalClaimPaidAmt", header:"TotalClaimPaidAmt", sort:"string", adjust:"header"},
+        {id:"totalPaidClaimsCount", header:"TotalUserPaidClaimsCount", sort:"string", adjust:"header"}
+      ],
+      autoheight:true,
+      autowidth:false,
+    });
+    webix.ui({
+      borderless:true,
+      container:"multiple_chart",
+      view:"chart",
+      type:"bar",
+      id:"multi_chart",
+      barWidth:20,
+      radius:2,
+      alpha: 0.7,
+      gradient:"rising",
+      xAxis:{
+        template:"#user_firstname#"
+      },
+      yAxis:{
+        property: "#totalClaimPaidAmt#"
+      },
+      legend:{
+        values:[
+          {
+            text:"Type B",
+            color:"#69ba00"
+          },
+          {
+            text:"Type C",
+            color:"#de619c",
+            markerType: "item"
+          }
+        ],
+          valign:"middle",
+          align:"right",
+          width:90,
+          layout:"y"
+      },
+      series:[
+        {
+          value:"#totalClaimPaidAmt#",
+          color:"#69ba00",
+          tooltip:{
+            template:"#totalClaimPaidAmt#"
+          }
+        },
+        {
+          type:"line",
+          value:"#totalPaidClaimsCount#",
+          color:"#36abee",
+          item:{
+            borderColor: "#b7286c",
+            color: "#de619c",
+            type: "s"
+          },
+          line:{
+            color:"#de619c",
+            width:2
+          },
+          tooltip:{
+            template:"#totalPaidClaimsCount#"
+          }
+        }
+      ],
+    });
+    webix.ui({
+      container:"multi_form_sort",
+      margin: 10,
+      cols:[
+        { view: "button", label: "UserFirstName, ASC",  click:"$$('multi_chart').sort('#user_firstname#','asc');"},
+        { view: "button", label: "TotalClaimPaidAmt, DESC",  click:"$$('multi_chart').sort('#totalClaimPaidAmt#','desc');"},
+        { view: "button", label: "TotalPaidClaimsCount, ASC",  click:"$$('multi_chart').sort('#totalPaidClaimsCount#','asc');"}
+      ]
+    });
+
+  });
+</script>
